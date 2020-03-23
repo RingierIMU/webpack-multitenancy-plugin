@@ -43,6 +43,7 @@ function checkForModuleReplacement(path, excludedPaths) {
   if (!path || !Array.isArray(excludedPaths)) {
     return false
   }
+  excludedPaths.push('/node_modules/')
   for (let i = 0; i < excludedPaths.length; i++) {
     if (path.includes(excludedPaths[i])) {
       return false
@@ -51,11 +52,35 @@ function checkForModuleReplacement(path, excludedPaths) {
   return true
 }
 
-function runSetup(srcPath) {
+function runSetup({ srcPath, themePath, tenantPath, tenant }) {
   if (!fs.existsSync(tempPath)) {
     fs.mkdirSync(tempPath)
     fs.mkdirSync(extendPath)
     fs.symlinkSync(`${rootPath}${srcPath}`, `${tempDir}/${includeDir}`, 'dir')
+  }
+
+  if (!fs.existsSync(`${rootPath}${themePath}`)){
+    fs.mkdirSync(`${rootPath}${themePath}`)
+
+    if (tenant) {
+      fs.mkdirSync(`${rootPath}${tenantPath}`)
+    }
+  }
+
+  cleanDirectoryRecursive(extendPath)
+}
+
+function cleanDirectoryRecursive(path) {
+  if (fs.existsSync(path)) {
+    fs.readdirSync(path).forEach(function(file) {
+      const curPath = `${path}/${file}`
+      if (fs.lstatSync(curPath).isDirectory()) {
+        cleanDirectoryRecursive(curPath)
+      } else {
+        fs.unlinkSync(curPath)
+      }
+    })
+    fs.rmdirSync(path)
   }
 }
 
@@ -68,18 +93,15 @@ module.exports = function multiTenantPlugin(
     srcDir = 'src',
     beforeRun,
     injectEnvironment = false,
-    excludeDirs = ['/node_modules/'],
-    cleanDirectories = []
-  }
+    excludeDirs = [],
+  } = {}
 ) {
-  const themePath = `/${themeDir}/${theme}/`
-  const tenantPath = `${themePath}${tenantDir}/${tenant}/`
+  const themePath = theme ? `/${themeDir}/${theme}/` : `/${themeDir}/`
+  const tenantPath = tenant ? `${themePath}${tenantDir}/${tenant}/` : `${themePath}${tenantDir}/`
   const srcPath = `/${srcDir}/`
   const srcRegexPath = new RegExp(`(${srcPath})`)
 
-  runSetup(srcPath)
-
-  cleanDirectories.concat([extendPath, includePath]).forEach(path => this.cleanDirectoryRecursive(path))
+  runSetup({ srcPath, tenant, themePath, tenantPath })
 
   if (injectEnvironment) {
     injectMultiTenantEnvironment(themePath, tenantPath)
@@ -117,9 +139,9 @@ module.exports = function multiTenantPlugin(
         if (replace) {
           fs.mkdirSync(
             `.tmp/extend${path
-              .dirname(resource.userRequest)
+              .dirname(resource.userRequest.replace(rootPath, ''))
               .replace(__dirname, '')
-              .replace(srcPath, '')}`,
+              .replace(srcPath.replace(/\//g, ''), '')}`,
             { recursive: true },
             (err) => {
               if (err) throw err
@@ -129,10 +151,11 @@ module.exports = function multiTenantPlugin(
           fs.copyFileSync(
             resource.userRequest,
             `.tmp/extend${path
-              .dirname(resource.userRequest)
+              .dirname(resource.userRequest.replace(rootPath, ''))
               .replace(__dirname, '')
-              .replace(srcPath, '')}/${path.basename(resource.userRequest)}`
+              .replace(srcPath.replace(/\//g, ''), '')}/${path.basename(resource.userRequest)}`
           )
+
           resource.request = resource.request.replace(srcRegexPath, filePath)
           resource.resource = resourcePath
         }
