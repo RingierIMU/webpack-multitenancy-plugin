@@ -86,14 +86,14 @@ export default {
 ```
 
 ```html
-  <!--- /themes/test-theme/components/header-nav.vue --->
+  <!-- /themes/test-theme/components/header-nav.vue -->
   <template>
-    <!--- change the HeaderNav template --->
+    <!-- change the HeaderNav template -->
     <nav>
-      <p>Welcome {{ username }}</p> <!-- data and methods from the HeaderNav is still available and reactive --->
+      <p>Welcome {{ username }}</p> <!-- data and methods from the HeaderNav is still available and reactive -->
       <Avatar />
-      <button @click="login">login<button> <!-- call our new method --->
-      <button @click="logout">logout<button> <!-- call the HeaderNav method --->
+      <button @click="login">login<button> <!-- call our new method -->
+      <button @click="logout">logout<button> <!-- call the HeaderNav method -->
     </nav>
   </template>
 ```
