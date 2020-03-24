@@ -16,5 +16,6 @@
   "bugs": {
     "url": "https://github.com/RingierIMU/webpack-multitenancy-plugin/issues"
   },
-  "homepage": "https://github.com/RingierIMU/webpack-multitenancy-plugin#readme"
+  "homepage": "https://github.com/RingierIMU/webpack-multitenancy-plugin#readme",
+  "peerDependencies": {}
 }
