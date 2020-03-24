@@ -66,6 +66,7 @@ module.exports = {
 
 ```vue
 <script>
+// /themes/test-theme/components/header-nav.vue
 import HeaderNav from '@extend/components/header-nav'
 import Avatar from '@extend/components/avatar'
 
@@ -82,16 +83,19 @@ export default {
 }
 
 </script>
+```
 
-<template>
-  <!--- change the HeaderNav template --->
-  <nav>
-    <p>Welcome {{ username }}</p> <!-- data and methods from the HeaderNav is still available and reactive --->
-    <Avatar />
-    <button @click="login">login<button> <!-- call our new method --->
-    <button @click="logout">logout<button> <!-- call the HeaderNav method --->
-  </nav>
-</template>
+```html
+  <!--- /themes/test-theme/components/header-nav.vue --->
+  <template>
+    <!--- change the HeaderNav template --->
+    <nav>
+      <p>Welcome {{ username }}</p> <!-- data and methods from the HeaderNav is still available and reactive --->
+      <Avatar />
+      <button @click="login">login<button> <!-- call our new method --->
+      <button @click="logout">logout<button> <!-- call the HeaderNav method --->
+    </nav>
+  </template>
 ```
 
 ## Options
