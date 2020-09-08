@@ -1,6 +1,6 @@
 {
   "name": "@swoop-ltd/webpack-multitenancy-plugin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "index.js",
   "private": false,
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RingierIMU/webpack-multitenancy-plugin.git"
+    "url": "git+https://github.com/swoop-ltd/webpack-multitenancy-plugin.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/RingierIMU/webpack-multitenancy-plugin/issues"
+    "url": "https://github.com/swoop-ltd/webpack-multitenancy-plugin/issues"
   },
-  "homepage": "https://github.com/RingierIMU/webpack-multitenancy-plugin#readme",
+  "homepage": "https://github.com/swoop-ltd/webpack-multitenancy-plugin#readme",
   "peerDependencies": {},
   "dependencies": {
     "chokidar": "^3.4.2"
