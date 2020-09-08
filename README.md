@@ -5,9 +5,9 @@ Dynamically replace modules by adding them in a subfolder with the same path. Th
 ## Install
 
 ```bash
-yarn add -D @roamafrica/webpack-multitenancy-plugin
+yarn add -D @swoop-ltd/webpack-multitenancy-plugin
 
-npm i -D @roamafrica/webpack-multitenancy-plugin
+npm i -D @swoop-ltd/webpack-multitenancy-plugin
 ```
 
 ## Build or serve with Vue-cli
@@ -19,7 +19,7 @@ yarn serve theme=test-theme
 
 ```js
 // vue.config.js
-const WebpackMultitenancyPlugin = require('@roamafrica/webpack-multitenancy-plugin')
+const WebpackMultitenancyPlugin = require('@swoop-ltd/webpack-multitenancy-plugin')
 
 const args = process.argv.slice(3) // get argument passed
 
@@ -43,7 +43,7 @@ By extending components you will have access to any functionality of the parent 
 
 ```js
 // vue.config.js
-const WebpackMultitenancyPlugin = require('@roamafrica/webpack-multitenancy-plugin')
+const WebpackMultitenancyPlugin = require('@swoop-ltd/webpack-multitenancy-plugin')
 
 const args = process.argv.slice(3) // get argument passed
 
