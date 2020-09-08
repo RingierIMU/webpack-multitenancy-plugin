@@ -1,149 +1,164 @@
-const webpack = require("webpack");
-const path = require("path");
-const fs = require("fs");
+const webpack = require('webpack')
+const path = require('path')
+const fs = require('fs')
 
 const rootPath = process.cwd();
-const tempDir = ".tmp";
-const extendDir = "extend";
-const includeDir = "include";
+const tempDir = '.tmp'
+const extendDir = 'extend'
+const includeDir = 'include'
 
-const tempPath = `${rootPath}/${tempDir}/`;
-const extendPath = `${tempPath}${extendDir}/`;
-const includePath = `${tempPath}${includeDir}/`;
+const tempPath = `${rootPath}/${tempDir}/`
+const extendPath = `${tempPath}${extendDir}/`
+const includePath = `${tempPath}${includeDir}/`
 
-function injectMultiTenantEnvironment(tenantPath) {
-  const envPath = fs.existsSync(tenantPath);
-  const envFile =
-    process.env.NODE_ENV === "development"
-      ? ".env.local.json"
-      : `.env.${process.env.NODE_ENV}.json`;
+function injectMultiTenantEnvironment(themePath, tenantPath) {
 
-  const tenantEnvPath = `.${tenantPath}${envFile}`;
+  const envPath = fs.existsSync(tenantPath) ? tenantPath : themePath
+  const envFile = process.env.NODE_ENV === 'development' ? '.env.local.json' : `.env.${process.env.NODE_ENV}.json`
+  
+  const themeEnvPath = `.${themePath}${envFile}`
+  const tenantEnvPath = `.${tenantPath}${envFile}`
 
-  let env = {};
+  let env = {}
+  if (fs.existsSync(themeEnvPath)) {
+    env = {
+      ...require(`.${envPath}${envFile}`)
+    }
+  }
+
   if (fs.existsSync(tenantEnvPath)) {
     env = {
       ...env,
-      ...require(`.${envPath}${envFile}`),
-    };
+      ...require(`.${envPath}${envFile}`)
+    }
   }
 
   process.env = {
     ...process.env,
-    ...env,
-  };
+    ...env
+  }
 }
 
 function checkForModuleReplacement(path, excludedPaths) {
   if (!path || !Array.isArray(excludedPaths)) {
-    return false;
+    return false
   }
-  excludedPaths.push("/node_modules/");
+  excludedPaths.push('/node_modules/')
   for (let i = 0; i < excludedPaths.length; i++) {
     if (path.includes(excludedPaths[i])) {
-      return false;
+      return false
     }
   }
-  return true;
+  return true
 }
 
-function runSetup({ srcPath, tenantPath, tenant }) {
+function runSetup({ srcPath, themePath, tenantPath, tenant }) {
   if (!fs.existsSync(tempPath)) {
-    fs.mkdirSync(tempPath);
-    fs.mkdirSync(extendPath);
-    fs.symlinkSync(`${rootPath}${srcPath}`, `${tempDir}/${includeDir}`, "dir");
+    fs.mkdirSync(tempPath)
+    fs.mkdirSync(extendPath)
+    fs.symlinkSync(`${rootPath}${srcPath}`, `${tempDir}/${includeDir}`, 'dir')
   }
 
-  if (tenant) {
-    if (!fs.existsSync(`${rootPath}${tenantPath}`)) {
-      throw new Error(`Tenant does not exist at path ${rootPath}${tenantPath}`);
+  if (!fs.existsSync(`${rootPath}${themePath}`)){
+    fs.mkdirSync(`${rootPath}${themePath}`)
+
+    if (tenant) {
+      fs.mkdirSync(`${rootPath}${tenantPath}`)
     }
-    process.env = {
-      ...process.env,
-      VUE_APP_TENANT: tenant,
-    };
   }
+
+  cleanDirectoryRecursive(extendPath)
 }
 
 function cleanDirectoryRecursive(path) {
   if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(function (file) {
-      const curPath = `${path}/${file}`;
+    fs.readdirSync(path).forEach(function(file) {
+      const curPath = `${path}/${file}`
       if (fs.lstatSync(curPath).isDirectory()) {
-        cleanDirectoryRecursive(curPath);
+        cleanDirectoryRecursive(curPath)
       } else {
-        fs.unlinkSync(curPath);
+        fs.unlinkSync(curPath)
       }
-    });
-    fs.rmdirSync(path);
+    })
+    fs.rmdirSync(path)
   }
 }
 
-module.exports = function multiTenantPlugin({
-  tenant,
-  tenantDir = "tenants",
-  srcDir = "src",
-  beforeRun,
-  injectEnvironment = false,
-  excludeDirs = [],
-} = {}) {
-  const tenantPath = tenant ? `/${tenantDir}/${tenant}/` : `/${tenantDir}/`;
-  const srcPath = `/${srcDir}/`;
-  const srcRegexPath = new RegExp(`(${srcPath})`);
+module.exports = function multiTenantPlugin(
+  {
+    tenant,
+    theme,
+    themeDir = 'themes',
+    tenantDir = 'tenants',
+    srcDir = 'src',
+    beforeRun,
+    injectEnvironment = false,
+    excludeDirs = [],
+  } = {}
+) {
+  const themePath = theme ? `/${themeDir}/${theme}/` : `/${themeDir}/`
+  const tenantPath = tenant ? `${themePath}${tenantDir}/${tenant}/` : `${themePath}${tenantDir}/`
+  const srcPath = `/${srcDir}/`
+  const srcRegexPath = new RegExp(`(${srcPath})`)
 
-  runSetup({ srcPath, tenant, tenantPath });
+  runSetup({ srcPath, tenant, themePath, tenantPath })
 
   if (injectEnvironment) {
-    injectMultiTenantEnvironment(tenantPath);
+    injectMultiTenantEnvironment(themePath, tenantPath)
   }
 
-  if (typeof beforeRun === "function") {
-    beforeRun();
+  if (typeof beforeRun === 'function') {
+    beforeRun()
   }
 
-  return new webpack.NormalModuleReplacementPlugin(srcRegexPath, function (
-    resource
-  ) {
-    if (checkForModuleReplacement(resource.userRequest, excludeDirs)) {
-      const tenantResourcePath = resource.userRequest.replace(
-        srcRegexPath,
-        tenantPath
-      );
-      let filePath = "";
-      let resourcePath = "";
-      let replace = false;
-      // if file exists in tenant use that path
-      if (tenant && fs.existsSync(tenantResourcePath)) {
-        filePath = tenantPath;
-        resourcePath = tenantResourcePath;
-        replace = true;
-      }
-      // if replacement is needed replace
-      if (replace) {
-        fs.mkdirSync(
-          `.tmp/extend${path
-            .dirname(resource.userRequest.replace(rootPath, ""))
-            .replace(__dirname, "")
-            .replace(srcPath.replace(/\//g, ""), "")}`,
-          { recursive: true },
-          (err) => {
-            if (err) throw err;
-          }
-        );
+  return new webpack.NormalModuleReplacementPlugin(srcRegexPath, function(resource) {
+      if (checkForModuleReplacement(resource.userRequest, excludeDirs)) {
+        const themeResourcePath = resource.userRequest.replace(
+          srcRegexPath,
+          themePath
+        )
+        const tenantResourcePath = resource.userRequest.replace(
+          srcRegexPath,
+          tenantPath
+        )
+        let filePath = ''
+        let resourcePath = ''
+        let replace = false
+        // if file exists in tenant use that path
+        if (tenant && fs.existsSync(tenantResourcePath)) {
+          filePath = tenantPath
+          resourcePath = tenantResourcePath
+          replace = true
+          // else if file exists in theme use that path
+        } else if (fs.existsSync(themeResourcePath)) {
+          filePath = themePath
+          resourcePath = themeResourcePath
+          replace = true
+        }
+        // if replacement is needed replace
+        if (replace) {
+          fs.mkdirSync(
+            `.tmp/extend${path
+              .dirname(resource.userRequest.replace(rootPath, ''))
+              .replace(__dirname, '')
+              .replace(srcPath.replace(/\//g, ''), '')}`,
+            { recursive: true },
+            (err) => {
+              if (err) throw err
+            }
+          )
 
-        fs.copyFileSync(
-          resource.userRequest,
-          `.tmp/extend${path
-            .dirname(resource.userRequest.replace(rootPath, ""))
-            .replace(__dirname, "")
-            .replace(srcPath.replace(/\//g, ""), "")}/${path.basename(
-            resource.userRequest
-          )}`
-        );
+          fs.copyFileSync(
+            resource.userRequest,
+            `.tmp/extend${path
+              .dirname(resource.userRequest.replace(rootPath, ''))
+              .replace(__dirname, '')
+              .replace(srcPath.replace(/\//g, ''), '')}/${path.basename(resource.userRequest)}`
+          )
 
-        resource.request = resource.request.replace(srcRegexPath, filePath);
-        resource.resource = resourcePath;
+          resource.request = resource.request.replace(srcRegexPath, filePath)
+          resource.resource = resourcePath
+        }
       }
-    }
-  });
-};
+    })
+}
