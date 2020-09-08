@@ -1,5 +1,5 @@
 {
-  "name": "@roamafrica/webpack-multitenancy-plugin",
+  "name": "@swoop-ltd/webpack-multitenancy-plugin",
   "version": "1.0.3",
   "description": "",
   "main": "index.js",
@@ -17,5 +17,8 @@
     "url": "https://github.com/RingierIMU/webpack-multitenancy-plugin/issues"
   },
   "homepage": "https://github.com/RingierIMU/webpack-multitenancy-plugin#readme",
-  "peerDependencies": {}
+  "peerDependencies": {},
+  "dependencies": {
+    "chokidar": "^3.4.2"
+  }
 }
