@@ -19,23 +19,23 @@ yarn serve theme=test-theme
 
 ```js
 // vue.config.js
-const WebpackMultitenancyPlugin = require('@swoop-ltd/webpack-multitenancy-plugin')
+const WebpackMultitenancyPlugin = require("@swoop-ltd/webpack-multitenancy-plugin");
 
-const args = process.argv.slice(3) // get argument passed
+const args = process.argv.slice(3); // get argument passed
 
 module.exports = {
   configureWebpack: {
     plugins: [
       WebpackMultitenancyPlugin({
-        theme: args[0].split('=')[1] // test-theme
-      })
+        theme: args[0].split("=")[1], // test-theme
+      }),
     ],
   },
-}
+};
 ```
 
 By default this will look in the `./themes/test-theme/` directory to find modules that should be replaced in `./src/`.
-For example `./themes/test-them/views/Home.vue` will replace  `./themes/src/views/Home.vue`.
+For example `./themes/test-them/views/Home.vue` will replace `./themes/src/views/Home.vue`.
 
 ## Vue extend and include components
 
@@ -43,32 +43,32 @@ By extending components you will have access to any functionality of the parent 
 
 ```js
 // vue.config.js
-const WebpackMultitenancyPlugin = require('@swoop-ltd/webpack-multitenancy-plugin')
+const WebpackMultitenancyPlugin = require("@swoop-ltd/webpack-multitenancy-plugin");
 
-const args = process.argv.slice(3) // get argument passed
+const args = process.argv.slice(3); // get argument passed
 
 module.exports = {
   configureWebpack: {
     resolve: {
       alias: {
-        '@extend': resolve(__dirname, '.tmp/extend/'),
-        '@include': resolve(__dirname, '.tmp/include/'),
-      }
+        "@extend": resolve(__dirname, ".tmp/extend/"),
+        "@include": resolve(__dirname, ".tmp/include/"),
+      },
     },
     plugins: [
       WebpackMultitenancyPlugin({
-        theme: args[0].split('=')[1] // test-theme
-      })
+        theme: args[0].split("=")[1], // test-theme
+      }),
     ],
   },
-}
+};
 ```
 
 ```vue
 <script>
 // /themes/test-theme/components/header-nav.vue
-import HeaderNav from '@extend/components/header-nav'
-import Avatar from '@extend/components/avatar'
+import HeaderNav from "@extend/components/header-nav";
+import Avatar from "@extend/components/avatar";
 
 export default {
   mixins: [HeaderNav],
@@ -78,10 +78,9 @@ export default {
   methods: {
     login() {
       // change the login function from HeaderNav
-    }
-  }
-}
-
+    },
+  },
+};
 </script>
 ```
 
