@@ -1,6 +1,6 @@
 {
   "name": "@swoop-ltd/webpack-multitenancy-plugin",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "",
   "main": "index.js",
   "private": false,
@@ -19,6 +19,7 @@
   "homepage": "https://github.com/swoop-ltd/webpack-multitenancy-plugin#readme",
   "peerDependencies": {},
   "dependencies": {
-    "chokidar": "^3.4.2"
+    "chokidar": "^3.4.2",
+    "dotenv": "^8.2.0"
   }
 }

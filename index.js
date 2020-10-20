@@ -1,3 +1,4 @@
+const { parse } = require('dotenv');
 const webpack = require("webpack");
 const path = require("path");
 const fs = require("fs");
@@ -11,20 +12,27 @@ const tempPath = `${rootPath}/${tempDir}/`;
 const extendPath = `${tempPath}${extendDir}/`;
 const includePath = `${tempPath}${includeDir}/`;
 
+
 function injectMultiTenantEnvironment(tenantPath) {
   const envPath = fs.existsSync(tenantPath);
   const envFile =
     process.env.NODE_ENV === "development"
-      ? ".env.local.json"
-      : `.env.${process.env.NODE_ENV}.json`;
+      ? ".env.local"
+      : `.env.${process.env.NODE_ENV}`;
 
+  const tenantDefaultEnvPath = `.${tenantPath}.env`;
   const tenantEnvPath = `.${tenantPath}${envFile}`;
 
   let env = {};
+  if (fs.existsSync(tenantDefaultEnvPath)) {
+    env = {
+      ...parse(fs.readFileSync(tenantDefaultEnvPath, 'utf8'))
+    };
+  }
   if (fs.existsSync(tenantEnvPath)) {
     env = {
       ...env,
-      ...require(`.${envPath}${envFile}`),
+      ...parse(fs.readFileSync(tenantEnvPath, 'utf8'))
     };
   }
 
@@ -84,7 +92,7 @@ module.exports = function multiTenantPlugin({
   tenantDir = "tenants",
   srcDir = "src",
   beforeRun,
-  injectEnvironment = false,
+  injectEnvironment = true,
   excludeDirs = [],
 } = {}) {
   const tenantPath = tenant ? `/${tenantDir}/${tenant}/` : `/${tenantDir}/`;
