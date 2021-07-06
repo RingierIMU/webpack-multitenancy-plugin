@@ -34,7 +34,12 @@ module.exports = ({ tenantDir, command }) => {
   }
 
   function executeServe() {
-    const cmd = `vue-cli-service`;
+    let cmd = `vue-cli-service`;
+
+    // if windows operating system
+    if (process.platform === 'win32') {
+      cmd = `${process.cwd()}\\node_modules\\.bin\\vue-cli-service.cmd`
+    }
 
     spawnedProcess = spawn(cmd, [command], {
       env: {
@@ -43,6 +48,8 @@ module.exports = ({ tenantDir, command }) => {
       stdio: "inherit",
       detached: true,
     });
+
+    spawnedProcess.on('error', (e) => console.error(e))
 
     return spawnedProcess;
   }
